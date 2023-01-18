@@ -121,20 +121,28 @@ public class CustomJdbcOAuth2AuthorizationService extends JdbcOAuth2Authorizatio
         }
     }
 
-    private void updateAuthorization(OAuth2Authorization authorization) {
+    private void updateAuthorization(OAuth2Authorization authorization)
+    {
         List<SqlParameterValue> parameters = (List)this.authorizationParametersMapper.apply(authorization);
         SqlParameterValue id = (SqlParameterValue)parameters.remove(0);
         parameters.add(id);
         LobCreator lobCreator = this.lobHandler.getLobCreator();
 
-        try {
+        try
+        {
             PreparedStatementSetter pss = new LobCreatorArgumentPreparedStatementSetter(lobCreator, parameters.toArray());
             this.jdbcOperations.update("UPDATE oauth2_authorization SET registered_client_id = ?, principal_name = ?, authorization_grant_type = ?, attributes = ?, state = ?, authorization_code_value = ?, authorization_code_issued_at = ?, authorization_code_expires_at = ?, authorization_code_metadata = ?, access_token_value = ?, access_token_issued_at = ?, access_token_expires_at = ?, access_token_metadata = ?, access_token_type = ?, access_token_scopes = ?, oidc_id_token_value = ?, oidc_id_token_issued_at = ?, oidc_id_token_expires_at = ?, oidc_id_token_metadata = ?, refresh_token_value = ?, refresh_token_issued_at = ?, refresh_token_expires_at = ?, refresh_token_metadata = ? WHERE id = ?", pss);
-        } catch (Throwable var8) {
-            if (lobCreator != null) {
-                try {
+        }
+        catch (Throwable var8)
+        {
+            if (lobCreator != null)
+            {
+                try
+                {
                     lobCreator.close();
-                } catch (Throwable var7) {
+                }
+                catch (Throwable var7)
+                {
                     var8.addSuppressed(var7);
                 }
             }
@@ -142,13 +150,15 @@ public class CustomJdbcOAuth2AuthorizationService extends JdbcOAuth2Authorizatio
             throw var8;
         }
 
-        if (lobCreator != null) {
+        if (lobCreator != null)
+        {
             lobCreator.close();
         }
 
     }
 
-    private void insertAuthorization(OAuth2Authorization authorization) {
+    private void insertAuthorization(OAuth2Authorization authorization)
+    {
         List<SqlParameterValue> parameters = (List)this.authorizationParametersMapper.apply(authorization);
         LobCreator lobCreator = this.lobHandler.getLobCreator();
 
@@ -264,7 +274,8 @@ public class CustomJdbcOAuth2AuthorizationService extends JdbcOAuth2Authorizatio
         private final String columnName;
         private final int dataType;
 
-        private ColumnMetadata(String columnName, int dataType) {
+        private ColumnMetadata(String columnName, int dataType)
+        {
             this.columnName = columnName;
             this.dataType = dataType;
         }
@@ -280,12 +291,17 @@ public class CustomJdbcOAuth2AuthorizationService extends JdbcOAuth2Authorizatio
 
     private ColumnMetadata getColumnMetadata(JdbcOperations jdbcOperations, String columnName, int defaultDataType)
     {
-        Integer dataType = (Integer) this.jdbcOperations.execute( (ConnectionCallback<Integer>) (conn) -> {
+        Integer dataType = (Integer) this.jdbcOperations.execute( (ConnectionCallback<Integer>) (conn) ->
+        {
             DatabaseMetaData databaseMetaData = conn.getMetaData();
             ResultSet rs = databaseMetaData.getColumns((String)null, (String)null, "oauth2_authorization", columnName);
-            if (rs.next()) {
+
+            if (rs.next())
+            {
                 return rs.getInt("DATA_TYPE");
-            } else {
+            }
+            else
+            {
                 rs = databaseMetaData.getColumns((String)null, (String)null, "oauth2_authorization".toUpperCase(), columnName.toUpperCase());
                 return rs.next() ? rs.getInt("DATA_TYPE") : null;
             }
@@ -304,7 +320,9 @@ public class CustomJdbcOAuth2AuthorizationService extends JdbcOAuth2Authorizatio
         LobCreator lobCreator = this.getLobHandler().getLobCreator();
 
         OAuth2Authorization var6;
-        try {
+
+        try
+        {
             PreparedStatementSetter pss = new LobCreatorArgumentPreparedStatementSetter(lobCreator, parameters.toArray());
             List<OAuth2Authorization> result = this.getJdbcOperations().query("SELECT id, registered_client_id, principal_name, authorization_grant_type, attributes, state, authorization_code_value, authorization_code_issued_at, authorization_code_expires_at,authorization_code_metadata,access_token_value,access_token_issued_at,access_token_expires_at,access_token_metadata,access_token_type,access_token_scopes,oidc_id_token_value,oidc_id_token_issued_at,oidc_id_token_expires_at,oidc_id_token_metadata,refresh_token_value,refresh_token_issued_at,refresh_token_expires_at,refresh_token_metadata FROM oauth2_authorization WHERE " + filter, pss, this.getAuthorizationRowMapper());
             var6 = !result.isEmpty() ? (OAuth2Authorization)result.get(0) : null;

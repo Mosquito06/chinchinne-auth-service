@@ -1,4 +1,4 @@
-package com.chinchinne.authservice.config;
+package com.chinchinne.authservice.filter;
 import com.chinchinne.authservice.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -17,22 +17,26 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 @Component
-public class PasswordGrantFilter extends OncePerRequestFilter {
+public class PasswordGrantFilter extends OncePerRequestFilter
+{
    private static final String DEFAULT_AUTH_ENDPOINT_URI = "/oauth/token";
 
    private final RequestMatcher authEndpointMatcher;
    private final AuthService authService;
 
    @Autowired
-   public PasswordGrantFilter(AuthService authService) {
+   public PasswordGrantFilter(AuthService authService)
+   {
       this.authService = authService;
       this.authEndpointMatcher = createDefaultRequestMatcher();
    }
 
    @SuppressWarnings("NullableProblems")
    @Override
-   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-      if (!this.authEndpointMatcher.matches(request)) {
+   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException
+   {
+      if (!this.authEndpointMatcher.matches(request))
+      {
          filterChain.doFilter(request, response);
          return;
       }
@@ -63,7 +67,7 @@ public class PasswordGrantFilter extends OncePerRequestFilter {
 
       RequestMatcher authorizationConsentMatcher = new AndRequestMatcher
       (
-         authorizationRequestPostMatcher
+          authorizationRequestPostMatcher
          ,new NegatedRequestMatcher(responseTypeParameterMatcher)
       );
 

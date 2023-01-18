@@ -47,8 +47,8 @@ import java.util.stream.Collectors;
 
 @Configuration(proxyBeanMethods = false)
 @Order(1)
-public class OauthConfig {
-
+public class OauthConfig
+{
    private static final String UNIQUE_CLIENT_ID = "ec3898c5-7d13-40ec-8f67-24d3d34b891a";
    private static final String AUTHORITIES_CLAIM = "authorities";
 
@@ -62,23 +62,25 @@ public class OauthConfig {
 
    @Bean
    @SuppressWarnings("unused")
-   public RegisteredClientRepository registeredClientRepository(JdbcTemplate jdbcTemplate) {
+   public RegisteredClientRepository registeredClientRepository(JdbcTemplate jdbcTemplate)
+   {
       RegisteredClient registeredClient = RegisteredClient.withId(UNIQUE_CLIENT_ID)
-            .clientId(authProperties.getClientId())
-            .clientSecret(passwordEncoder().encode(authProperties.getClientSecret()))
-            .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-            .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-            .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-            .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-            .redirectUri(authProperties.getRedirectUri())
-            .scope(OidcScopes.OPENID)
-            .scope("read")
-            .scope("write")
-            .scope("user_info")
-            .clientSettings(ClientSettings.builder().requireAuthorizationConsent(false).build())
-            .build();
+                                                         .clientId(authProperties.getClientId())
+                                                         .clientSecret(passwordEncoder().encode(authProperties.getClientSecret()))
+                                                         .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                                                         .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_JWT)
+                                                         .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
+                                                         .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                                                         .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+                                                         .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                                                         .redirectUri(authProperties.getRedirectUri())
+                                                         .scope(OidcScopes.OPENID)
+                                                         .scope("read")
+                                                         .scope("write")
+                                                         .scope("user_info")
+                                                         .clientSettings(ClientSettings.builder().requireAuthorizationConsent(false).build())
+                                                         .build();
 
-      // Save registered client in db as if in-memory
       JdbcRegisteredClientRepository registeredClientRepository = new JdbcRegisteredClientRepository(jdbcTemplate);
       registeredClientRepository.save(registeredClient);
 
@@ -90,7 +92,6 @@ public class OauthConfig {
    public OAuth2AuthorizationService authorizationService(JdbcTemplate jdbcTemplate, RegisteredClientRepository registeredClientRepository)
    {
       //return new JdbcOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository);
-
       return new CustomJdbcOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository);
    }
 

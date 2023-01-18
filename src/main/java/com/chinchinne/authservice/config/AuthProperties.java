@@ -7,7 +7,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "auth")
 @Data
-public class AuthProperties {
+public class AuthProperties
+{
    private boolean localServer;
    private long accessTokenValidity;
    private long refreshTokenValidity;

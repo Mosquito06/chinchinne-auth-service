@@ -2,6 +2,7 @@ package com.chinchinne.authservice.config;
 
 import java.util.function.Function;
 
+import com.chinchinne.authservice.filter.PasswordGrantFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,6 +13,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
+import org.springframework.security.oauth2.server.authorization.authentication.ClientSecretAuthenticationProvider;
 import org.springframework.security.oauth2.server.authorization.oidc.authentication.OidcUserInfoAuthenticationContext;
 import org.springframework.security.oauth2.server.authorization.oidc.authentication.OidcUserInfoAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -26,11 +28,14 @@ public class AuthorizationServerConfig {
 
    private final PasswordGrantFilter passwordGrantFilter;
 
+   ClientSecretAuthenticationProvider oauthClientAuthProvider;
+
    @Autowired
    @SuppressWarnings("unused")
-   public AuthorizationServerConfig(PasswordGrantFilter passwordGrantFilter)
+   public AuthorizationServerConfig(PasswordGrantFilter passwordGrantFilter, ClientSecretAuthenticationProvider oauthClientAuthProvider)
    {
       this.passwordGrantFilter = passwordGrantFilter;
+      this.oauthClientAuthProvider = oauthClientAuthProvider;
    }
 
    @Bean
@@ -40,6 +45,11 @@ public class AuthorizationServerConfig {
    {
       OAuth2AuthorizationServerConfigurer<HttpSecurity> authorizationServerConfigurer = new OAuth2AuthorizationServerConfigurer<>();
       RequestMatcher endpointsMatcher = authorizationServerConfigurer.getEndpointsMatcher();
+
+//      authorizationServerConfigurer.tokenIntrospectionEndpoint( introspec ->
+//      {
+//         introspec.authenticationProvider(oauthClientAuthProvider);
+//      });
 
       RequestMatcher passwordGrantEndPointMatcher = new AntPathRequestMatcher("/oauth/token");
 
@@ -53,8 +63,9 @@ public class AuthorizationServerConfig {
 
       http  .requestMatchers().requestMatchers(endpointsMatcher, passwordGrantEndPointMatcher).and()
             .authorizeRequests()
-            .antMatchers("/oauth/token").permitAll()
-            .anyRequest().authenticated()
+            //.antMatchers("/oauth/token").permitAll()
+            // .anyRequest().authenticated()
+            .anyRequest().permitAll()
             .and()
             .csrf().disable()
             .apply(authorizationServerConfigurer)

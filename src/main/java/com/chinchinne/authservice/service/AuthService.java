@@ -34,7 +34,8 @@ import java.util.*;
 
 @Service
 @Slf4j
-public class AuthService {
+public class AuthService
+{
    private final AuthenticationManager authenticationManager;
    private final OAuth2AuthorizationCodeRequestAuthenticationProvider oAuth2AuthorizationCodeRequestAuthenticationProvider;
    private final OAuth2AuthorizationCodeAuthenticationProvider oAuth2AuthorizationCodeAuthenticationProvider;
@@ -47,14 +48,17 @@ public class AuthService {
    private static final String LOCAL_AUTHORIZATION_URI = "http://localhost:30020/oauth2/authorize";
 
    @Autowired
-   public AuthService(
-         @Lazy AuthenticationManager authenticationManager,
-         RegisteredClientRepository registeredClientRepository,
-         @Lazy OAuth2AuthorizationService authorizationService,
-         @Lazy OAuth2AuthorizationConsentService authorizationConsentService,
-         ClientSecretAuthenticationProvider clientSecretAuthenticationProvider,
-         OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator,
-         AuthProperties authProperties) {
+   public AuthService
+   (
+          @Lazy AuthenticationManager authenticationManager
+         ,RegisteredClientRepository registeredClientRepository
+         ,@Lazy OAuth2AuthorizationService authorizationService
+         ,@Lazy OAuth2AuthorizationConsentService authorizationConsentService
+         ,ClientSecretAuthenticationProvider clientSecretAuthenticationProvider
+         ,OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator
+         ,AuthProperties authProperties
+   )
+   {
 
       this.authenticationManager = authenticationManager;
       this.oAuth2AuthorizationCodeRequestAuthenticationProvider = new OAuth2AuthorizationCodeRequestAuthenticationProvider(registeredClientRepository, authorizationService, authorizationConsentService);
@@ -64,7 +68,8 @@ public class AuthService {
       this.objectMapper = new ObjectMapper();
    }
 
-   public String getAccessTokenForRequest(HttpServletRequest request) {
+   public String getAccessTokenForRequest(HttpServletRequest request)
+   {
       String userName = request.getParameter("username");
       String passwordInBase64 = request.getParameter("password");
       Assert.notNull(userName, "Username parameter must not be empty or null");
@@ -75,7 +80,8 @@ public class AuthService {
       UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(userName, password);
       Authentication principal = authenticationManager.authenticate(authRequest);
 
-      try {
+      try
+      {
          // from org.springframework.security.oauth2.server.authorization.web.OAuth2AuthorizationEndpointFilter.doFilterInternal
          // from org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2AuthorizationCodeRequestAuthenticationConverter.convert
          OAuth2AuthorizationCodeRequestAuthenticationToken requestAuthenticationToken =
@@ -97,14 +103,21 @@ public class AuthService {
          params.put("redirect_uri", authProperties.getRedirectUri());
          params.put("grant_type", "authorization_code");
          params.put("client_id", authProperties.getClientId());
-         OAuth2ClientAuthenticationToken clientAuthenticationToken = new OAuth2ClientAuthenticationToken(authProperties.getClientId(),
-               ClientAuthenticationMethod.CLIENT_SECRET_BASIC, authProperties.getClientSecret(), params);
+         OAuth2ClientAuthenticationToken clientAuthenticationToken = new OAuth2ClientAuthenticationToken
+         (
+             authProperties.getClientId()
+            ,ClientAuthenticationMethod.CLIENT_SECRET_BASIC, authProperties.getClientSecret()
+            ,params
+         );
 
          Authentication clientAuthenticationResult = clientSecretAuthenticationProvider.authenticate(clientAuthenticationToken);
 
-         OAuth2AuthorizationCodeAuthenticationToken codeToken = new OAuth2AuthorizationCodeAuthenticationToken(
-               authorizationCodeRequestAuthenticationResult.getAuthorizationCode().getTokenValue(), clientAuthenticationResult,
-               authProperties.getRedirectUri(), new LinkedHashMap<>());
+         OAuth2AuthorizationCodeAuthenticationToken codeToken = new OAuth2AuthorizationCodeAuthenticationToken
+         (
+             authorizationCodeRequestAuthenticationResult.getAuthorizationCode().getTokenValue()
+            ,clientAuthenticationResult
+            ,authProperties.getRedirectUri(), new LinkedHashMap<>()
+         );
 
          ProviderSettings providerSettings = ProviderSettings.builder().issuer(authProperties.getIssuerUri()).build();
          ProviderContextHolder.setProviderContext(new ProviderContext(providerSettings, null));
@@ -117,58 +130,78 @@ public class AuthService {
          OAuth2RefreshToken refreshToken = accessTokenAuthentication.getRefreshToken();
          Map<String, Object> additionalParameters = accessTokenAuthentication.getAdditionalParameters();
 
-         if (principal.getPrincipal() instanceof AppUserPrincipal) {
+         if (principal.getPrincipal() instanceof AppUserPrincipal)
+         {
             AppUserPrincipal appUserPrincipal = ((AppUserPrincipal) principal.getPrincipal());
             AppUser user = appUserPrincipal.getUser();
             additionalParameters.put(FIRST_NAME, user.getFirstName());
             additionalParameters.put(LAST_NAME, user.getLastName());
          }
 
-         OAuth2AccessTokenResponse.Builder builder =
-               OAuth2AccessTokenResponse.withToken(accessToken.getTokenValue())
-                     .tokenType(accessToken.getTokenType())
-                     .scopes(accessToken.getScopes());
-         if (accessToken.getIssuedAt() != null && accessToken.getExpiresAt() != null) {
+         OAuth2AccessTokenResponse.Builder builder = OAuth2AccessTokenResponse.withToken(accessToken.getTokenValue())
+                                                                              .tokenType(accessToken.getTokenType())
+                                                                              .scopes(accessToken.getScopes());
+
+         if (accessToken.getIssuedAt() != null && accessToken.getExpiresAt() != null)
+         {
             builder.expiresIn(ChronoUnit.SECONDS.between(accessToken.getIssuedAt(), accessToken.getExpiresAt()));
          }
-         if (refreshToken != null) {
+
+         if (refreshToken != null)
+         {
             builder.refreshToken(refreshToken.getTokenValue());
          }
-         if (!CollectionUtils.isEmpty(additionalParameters)) {
+
+         if (!CollectionUtils.isEmpty(additionalParameters))
+         {
             builder.additionalParameters(additionalParameters);
          }
+
          OAuth2AccessTokenResponse accessTokenResponse = builder.build();
          Map<String, Object> accessTokenResponseMap = convert(accessTokenResponse);
 
          return objectMapper.writeValueAsString(accessTokenResponseMap);
-      } catch (Exception ex) {
+      }
+      catch (Exception ex)
+      {
          log.error("error in get token >>>", ex);
-         throw new RuntimeException(ex); // TODO security
+         throw new RuntimeException(ex);
       }
    }
 
-   public Map<String, Object> convert(OAuth2AccessTokenResponse tokenResponse) {
+   public Map<String, Object> convert(OAuth2AccessTokenResponse tokenResponse)
+   {
       Map<String, Object> parameters = new HashMap<>();
       parameters.put(OAuth2ParameterNames.ACCESS_TOKEN, tokenResponse.getAccessToken().getTokenValue());
       parameters.put(OAuth2ParameterNames.TOKEN_TYPE, tokenResponse.getAccessToken().getTokenType().getValue());
       parameters.put(OAuth2ParameterNames.EXPIRES_IN, getExpiresIn(tokenResponse));
-      if (!CollectionUtils.isEmpty(tokenResponse.getAccessToken().getScopes())) {
+
+      if (!CollectionUtils.isEmpty(tokenResponse.getAccessToken().getScopes()))
+      {
          parameters.put(OAuth2ParameterNames.SCOPE,
                StringUtils.collectionToDelimitedString(tokenResponse.getAccessToken().getScopes(), " "));
       }
-      if (tokenResponse.getRefreshToken() != null) {
+
+      if (tokenResponse.getRefreshToken() != null)
+      {
          parameters.put(OAuth2ParameterNames.REFRESH_TOKEN, tokenResponse.getRefreshToken().getTokenValue());
       }
-      if (!CollectionUtils.isEmpty(tokenResponse.getAdditionalParameters())) {
+
+      if (!CollectionUtils.isEmpty(tokenResponse.getAdditionalParameters()))
+      {
          parameters.putAll(tokenResponse.getAdditionalParameters());
       }
+
       return parameters;
    }
 
-   private long getExpiresIn(OAuth2AccessTokenResponse tokenResponse) {
-      if (tokenResponse.getAccessToken().getExpiresAt() != null) {
+   private long getExpiresIn(OAuth2AccessTokenResponse tokenResponse)
+   {
+      if (tokenResponse.getAccessToken().getExpiresAt() != null)
+      {
          return ChronoUnit.SECONDS.between(Instant.now(), tokenResponse.getAccessToken().getExpiresAt());
       }
+
       return -1;
    }
 }
