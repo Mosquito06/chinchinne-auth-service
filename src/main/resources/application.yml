@@ -1,0 +1,27 @@
+server:
+  port: 30020
+
+auth:
+  local-server: true
+  issuer-uri: http://127.0.0.1:${server.port}
+  jwks-uri: ${auth.issuer-uri}/oauth2/jwks
+  client-id: legacy-oauth-client
+  client-secret: secret
+  refresh-token-validity: 86400
+  access-token-validity: 43200
+  redirect-uri: https://127.0.0.1:8086/login/oauth2/code/custom
+
+spring:
+  datasource:
+    url: jdbc:mariadb://127.0.0.1:3306/chinchinne
+    driver-class-name: org.mariadb.jdbc.Driver
+    username: backend
+    password: backend
+  jpa:
+    generate-ddl: true
+    show-sql: true
+
+logging:
+  level:
+    root: info
+
