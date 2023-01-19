@@ -46,11 +46,6 @@ public class AuthorizationServerConfig {
       OAuth2AuthorizationServerConfigurer<HttpSecurity> authorizationServerConfigurer = new OAuth2AuthorizationServerConfigurer<>();
       RequestMatcher endpointsMatcher = authorizationServerConfigurer.getEndpointsMatcher();
 
-//      authorizationServerConfigurer.tokenIntrospectionEndpoint( introspec ->
-//      {
-//         introspec.authenticationProvider(oauthClientAuthProvider);
-//      });
-
       RequestMatcher passwordGrantEndPointMatcher = new AntPathRequestMatcher("/oauth/token");
 
       // Custom User Info Mapper that retrieves claims from a signed JWT
@@ -60,6 +55,9 @@ public class AuthorizationServerConfig {
          JwtAuthenticationToken principal = (JwtAuthenticationToken) authentication.getPrincipal();
          return new OidcUserInfo(principal.getToken().getClaims());
       };
+
+//      authorizationServerConfigurer.authorizationEndpoint( authorizationEndpoint->
+//              authorizationEndpoint.authenticationProvider());
 
       http  .requestMatchers().requestMatchers(endpointsMatcher, passwordGrantEndPointMatcher).and()
             .authorizeRequests()

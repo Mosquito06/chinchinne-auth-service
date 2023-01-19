@@ -12,6 +12,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.*;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AccessTokenResponse;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
@@ -43,6 +45,8 @@ public class AuthService
    private final AuthProperties authProperties;
    private final ObjectMapper objectMapper;
 
+   private BCryptPasswordEncoder passwordEncoder;
+
    private final static String FIRST_NAME = "firstName";
    private final static String LAST_NAME = "lastName";
    private static final String LOCAL_AUTHORIZATION_URI = "http://localhost:30020/oauth2/authorize";
@@ -57,6 +61,7 @@ public class AuthService
          ,ClientSecretAuthenticationProvider clientSecretAuthenticationProvider
          ,OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator
          ,AuthProperties authProperties
+         ,BCryptPasswordEncoder passwordEncoder
    )
    {
 
@@ -66,6 +71,7 @@ public class AuthService
       this.oAuth2AuthorizationCodeAuthenticationProvider = new OAuth2AuthorizationCodeAuthenticationProvider(authorizationService, tokenGenerator);
       this.authProperties = authProperties;
       this.objectMapper = new ObjectMapper();
+      this.passwordEncoder = passwordEncoder;
    }
 
    public String getAccessTokenForRequest(HttpServletRequest request)
@@ -75,7 +81,7 @@ public class AuthService
       Assert.notNull(userName, "Username parameter must not be empty or null");
       Assert.hasText(passwordInBase64, "Password parameter must not be empty or null");
       //String password = new String(Base64.getUrlDecoder().decode(passwordInBase64));
-      String password = passwordInBase64;
+      String password = passwordEncoder.encode(passwordInBase64);
 
       UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(userName, password);
       Authentication principal = authenticationManager.authenticate(authRequest);

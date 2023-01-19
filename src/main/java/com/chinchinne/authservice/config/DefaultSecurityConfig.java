@@ -1,5 +1,6 @@
 package com.chinchinne.authservice.config;
 
+import com.chinchinne.authservice.service.CustomUserDetailsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,13 +37,15 @@ public class DefaultSecurityConfig {
    @SuppressWarnings("unused")
    public UserDetailsService users(PasswordEncoder passwordEncoder)
    {
-      UserDetails user = User.builder()
-            .passwordEncoder(passwordEncoder::encode)
-            .username("admin")
-            .password("password")
-            .roles("USER")
-            .build();
-      return new InMemoryUserDetailsManager(user);
+//      UserDetails user = User.builder()
+//            .passwordEncoder(passwordEncoder::encode)
+//            .username("admin")
+//            .password("password")
+//            .roles("USER")
+//            .build();
+//      return new InMemoryUserDetailsManager(user);
+
+      return new CustomUserDetailsService();
    }
 
 }

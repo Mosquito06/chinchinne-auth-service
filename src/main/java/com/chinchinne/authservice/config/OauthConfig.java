@@ -1,5 +1,6 @@
 package com.chinchinne.authservice.config;
 
+import com.chinchinne.authservice.provider.CustomAuthenticationProvider;
 import com.chinchinne.authservice.service.CustomJdbcOAuth2AuthorizationService;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.KeyUse;
@@ -14,6 +15,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -116,15 +118,22 @@ public class OauthConfig
       return clientAuthenticationProvider;
    }
 
+//   @Bean
+//   @SuppressWarnings("unused")
+//   public DaoAuthenticationProvider authenticationProvider(UserDetailsService userDetailsService)
+//   {
+//      DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+//      authProvider.setUserDetailsService(userDetailsService);
+//      authProvider.setPasswordEncoder(passwordEncoder());
+//
+//      return authProvider;
+//   }
+
    @Bean
    @SuppressWarnings("unused")
-   public DaoAuthenticationProvider authenticationProvider(UserDetailsService userDetailsService)
+   public AuthenticationProvider authenticationProvider(UserDetailsService userDetailsService)
    {
-      DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-      authProvider.setUserDetailsService(userDetailsService);
-      authProvider.setPasswordEncoder(passwordEncoder());
-
-      return authProvider;
+      return new CustomAuthenticationProvider(userDetailsService);
    }
 
    @Bean
