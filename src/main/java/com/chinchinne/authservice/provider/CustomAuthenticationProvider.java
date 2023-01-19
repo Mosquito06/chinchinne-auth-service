@@ -1,11 +1,13 @@
 package com.chinchinne.authservice.provider;
 
-import com.chinchinne.authservice.service.CustomUserDetailsService;
+import com.chinchinne.authservice.model.AppUser;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.provisioning.UserDetailsManager;
 
 public class CustomAuthenticationProvider implements AuthenticationProvider
 {
@@ -19,13 +21,12 @@ public class CustomAuthenticationProvider implements AuthenticationProvider
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException
     {
-        authentication.getPrincipal();
+        String loginId = (String) authentication.getPrincipal();
+        String loginPass = (String) authentication.getCredentials();
 
+        UserDetails user = userDetailsService.loadUserByUsername(loginId);
 
-        //new UsernamePasswordAuthenticationToken(userName, password);
-
-
-        return null;
+        return new UsernamePasswordAuthenticationToken(loginId, loginPass, user.getAuthorities());
     }
 
     @Override

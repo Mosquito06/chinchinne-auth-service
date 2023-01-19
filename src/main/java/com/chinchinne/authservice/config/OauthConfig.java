@@ -131,7 +131,7 @@ public class OauthConfig
 
    @Bean
    @SuppressWarnings("unused")
-   public AuthenticationProvider authenticationProvider(UserDetailsService userDetailsService)
+   public CustomAuthenticationProvider authenticationProvider(UserDetailsService userDetailsService)
    {
       return new CustomAuthenticationProvider(userDetailsService);
    }

@@ -3,6 +3,7 @@ package com.chinchinne.authservice.config;
 import java.util.function.Function;
 
 import com.chinchinne.authservice.filter.PasswordGrantFilter;
+import com.chinchinne.authservice.provider.CustomAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,12 +31,15 @@ public class AuthorizationServerConfig {
 
    ClientSecretAuthenticationProvider oauthClientAuthProvider;
 
+   CustomAuthenticationProvider customAuthenticationProvider;
+
    @Autowired
    @SuppressWarnings("unused")
-   public AuthorizationServerConfig(PasswordGrantFilter passwordGrantFilter, ClientSecretAuthenticationProvider oauthClientAuthProvider)
+   public AuthorizationServerConfig(PasswordGrantFilter passwordGrantFilter, ClientSecretAuthenticationProvider oauthClientAuthProvider, CustomAuthenticationProvider customAuthenticationProvider)
    {
       this.passwordGrantFilter = passwordGrantFilter;
       this.oauthClientAuthProvider = oauthClientAuthProvider;
+      this.customAuthenticationProvider = customAuthenticationProvider;
    }
 
    @Bean
@@ -56,8 +60,8 @@ public class AuthorizationServerConfig {
          return new OidcUserInfo(principal.getToken().getClaims());
       };
 
-//      authorizationServerConfigurer.authorizationEndpoint( authorizationEndpoint->
-//              authorizationEndpoint.authenticationProvider());
+      authorizationServerConfigurer.authorizationEndpoint( authorizationEndpoint->
+              authorizationEndpoint.authenticationProvider(customAuthenticationProvider));
 
       http  .requestMatchers().requestMatchers(endpointsMatcher, passwordGrantEndPointMatcher).and()
             .authorizeRequests()
