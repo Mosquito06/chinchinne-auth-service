@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer;
@@ -25,8 +26,8 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 @Configuration(proxyBeanMethods = false)
-public class AuthorizationServerConfig {
-
+public class AuthorizationServerConfig
+{
    private final PasswordGrantFilter passwordGrantFilter;
 
    ClientSecretAuthenticationProvider oauthClientAuthProvider;
@@ -86,8 +87,9 @@ public class AuthorizationServerConfig {
 
    @Bean
    @SuppressWarnings("unused")
-   public AuthenticationManager authenticationManagerBean(AuthenticationConfiguration authenticationConfiguration) throws Exception
+   public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration, AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception
    {
+     // return authenticationManagerBuilder.authenticationProvider(customAuthenticationProvider).build();
       return authenticationConfiguration.getAuthenticationManager();
    }
 }

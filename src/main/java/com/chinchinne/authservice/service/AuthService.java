@@ -81,7 +81,8 @@ public class AuthService
       Assert.notNull(userName, "Username parameter must not be empty or null");
       Assert.hasText(passwordInBase64, "Password parameter must not be empty or null");
       //String password = new String(Base64.getUrlDecoder().decode(passwordInBase64));
-      String password = passwordEncoder.encode(passwordInBase64);
+      //String password = passwordEncoder.encode(passwordInBase64);
+      String password = passwordInBase64;
 
       UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(userName, password);
       Authentication principal = authenticationManager.authenticate(authRequest);

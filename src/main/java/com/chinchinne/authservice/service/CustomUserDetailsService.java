@@ -24,8 +24,8 @@ public class CustomUserDetailsService implements UserDetailsService
             throw new UsernameNotFoundException("not found loginId : " + username);
         });
 
-        System.out.println(user.toString());
+        UserDetails userDetails = new AppUserPrincipal(user);
 
-        return new AppUserPrincipal(user);
+        return userDetails;
     }
 }

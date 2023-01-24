@@ -1,7 +1,10 @@
 package com.chinchinne.authservice.config;
 
+import com.chinchinne.authservice.model.AppUserPrincipal;
 import com.chinchinne.authservice.provider.CustomAuthenticationProvider;
 import com.chinchinne.authservice.service.CustomJdbcOAuth2AuthorizationService;
+import com.fasterxml.jackson.databind.Module;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jose.jwk.RSAKey;
@@ -21,6 +24,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.jackson2.SecurityJackson2Modules;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.OAuth2Token;
@@ -37,12 +41,14 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.config.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.config.ProviderSettings;
+import org.springframework.security.oauth2.server.authorization.jackson2.OAuth2AuthorizationServerJackson2Module;
 import org.springframework.security.oauth2.server.authorization.token.*;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -94,7 +100,24 @@ public class OauthConfig
    public OAuth2AuthorizationService authorizationService(JdbcTemplate jdbcTemplate, RegisteredClientRepository registeredClientRepository)
    {
       //return new JdbcOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository);
-      return new CustomJdbcOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository);
+
+      JdbcOAuth2AuthorizationService service = new CustomJdbcOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository);
+      CustomJdbcOAuth2AuthorizationService.OAuth2AuthorizationRowMapper rowMapper = new CustomJdbcOAuth2AuthorizationService.OAuth2AuthorizationRowMapper(registeredClientRepository);
+
+      ObjectMapper objectMapper = new ObjectMapper();
+      ClassLoader classLoader = CustomJdbcOAuth2AuthorizationService.class.getClassLoader();
+
+      List<Module> securityModules = SecurityJackson2Modules.getModules(classLoader);
+      objectMapper.registerModules(securityModules);
+      objectMapper.registerModule(new OAuth2AuthorizationServerJackson2Module());
+      // You will need to write the Mixin for your class so Jackson can marshall it.
+      objectMapper.addMixIn(AppUserPrincipal.class, AppUserPrincipal.class);
+      rowMapper.setObjectMapper(objectMapper);
+      service.setAuthorizationRowMapper(rowMapper);
+
+
+      //return new CustomJdbcOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository);
+      return service;
    }
 
    @Bean
