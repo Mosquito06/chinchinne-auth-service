@@ -140,23 +140,23 @@ public class OauthConfig
       return clientAuthenticationProvider;
    }
 
-//   @Bean
-//   @SuppressWarnings("unused")
-//   public DaoAuthenticationProvider authenticationProvider(UserDetailsService userDetailsService)
-//   {
-//      DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-//      authProvider.setUserDetailsService(userDetailsService);
-//      authProvider.setPasswordEncoder(passwordEncoder());
-//
-//      return authProvider;
-//   }
-
    @Bean
    @SuppressWarnings("unused")
-   public CustomAuthenticationProvider authenticationProvider(UserDetailsService userDetailsService)
+   public DaoAuthenticationProvider authenticationProvider(UserDetailsService userDetailsService)
    {
-      return new CustomAuthenticationProvider(userDetailsService);
+      DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+      authProvider.setUserDetailsService(userDetailsService);
+      authProvider.setPasswordEncoder(passwordEncoder());
+
+      return authProvider;
    }
+
+//   @Bean
+//   @SuppressWarnings("unused")
+//   public CustomAuthenticationProvider authenticationProvider(UserDetailsService userDetailsService)
+//   {
+//      return new CustomAuthenticationProvider(userDetailsService);
+//   }
 
    @Bean
    @SuppressWarnings("unused")

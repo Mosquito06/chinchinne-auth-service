@@ -4,16 +4,18 @@ package com.chinchinne.authservice.service;
 import com.chinchinne.authservice.config.AuthProperties;
 import com.chinchinne.authservice.model.AppUser;
 import com.chinchinne.authservice.model.AppUserPrincipal;
+import com.chinchinne.authservice.model.CustomException;
+import com.chinchinne.authservice.model.ErrorCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.*;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AccessTokenResponse;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
@@ -85,10 +87,11 @@ public class AuthService
       String password = passwordInBase64;
 
       UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(userName, password);
-      Authentication principal = authenticationManager.authenticate(authRequest);
 
       try
       {
+         Authentication principal = authenticationManager.authenticate(authRequest);
+
          // from org.springframework.security.oauth2.server.authorization.web.OAuth2AuthorizationEndpointFilter.doFilterInternal
          // from org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2AuthorizationCodeRequestAuthenticationConverter.convert
          OAuth2AuthorizationCodeRequestAuthenticationToken requestAuthenticationToken =
@@ -168,6 +171,12 @@ public class AuthService
          Map<String, Object> accessTokenResponseMap = convert(accessTokenResponse);
 
          return objectMapper.writeValueAsString(accessTokenResponseMap);
+      }
+      catch ( BadCredentialsException e )
+      {
+         log.error( "여기 에러 : " + e.getMessage() );
+         throw new CustomException(ErrorCode.UNAUTHORIZED_MEMBER);
+
       }
       catch (Exception ex)
       {

@@ -1,4 +1,5 @@
 package com.chinchinne.authservice.filter;
+import com.chinchinne.authservice.model.CustomException;
 import com.chinchinne.authservice.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -33,7 +34,7 @@ public class PasswordGrantFilter extends OncePerRequestFilter
 
    @SuppressWarnings("NullableProblems")
    @Override
-   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException
+   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException, CustomException
    {
       if (!this.authEndpointMatcher.matches(request))
       {
