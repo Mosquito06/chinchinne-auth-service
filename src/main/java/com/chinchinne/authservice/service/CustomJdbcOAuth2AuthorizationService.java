@@ -383,8 +383,6 @@ public class CustomJdbcOAuth2AuthorizationService extends JdbcOAuth2Authorizatio
                 String principalName = rs.getString("principal_name");
                 String authorizationGrantType = rs.getString("authorization_grant_type");
                 Map<String, Object> attributes = this.parseMap(this.getLobValue(rs, "attributes"));
-                //Map<String, Object> attributes = this.parseMap(rs.getString("attributes"));
-                //String attributes = this.getLobValue(rs, "attributes");
 
                 builder.id(id).principalName(principalName).authorizationGrantType(new AuthorizationGrantType(authorizationGrantType)).attributes((attrs) -> {
                     attrs.putAll(attributes);

@@ -101,23 +101,22 @@ public class OauthConfig
    {
       //return new JdbcOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository);
 
-      JdbcOAuth2AuthorizationService service = new CustomJdbcOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository);
-      CustomJdbcOAuth2AuthorizationService.OAuth2AuthorizationRowMapper rowMapper = new CustomJdbcOAuth2AuthorizationService.OAuth2AuthorizationRowMapper(registeredClientRepository);
+//      JdbcOAuth2AuthorizationService service = new CustomJdbcOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository);
+//      CustomJdbcOAuth2AuthorizationService.OAuth2AuthorizationRowMapper rowMapper = new CustomJdbcOAuth2AuthorizationService.OAuth2AuthorizationRowMapper(registeredClientRepository);
+//
+//      ObjectMapper objectMapper = new ObjectMapper();
+//      ClassLoader classLoader = CustomJdbcOAuth2AuthorizationService.class.getClassLoader();
+//
+//      List<Module> securityModules = SecurityJackson2Modules.getModules(classLoader);
+//      objectMapper.registerModules(securityModules);
+//      objectMapper.registerModule(new OAuth2AuthorizationServerJackson2Module());
+//      // You will need to write the Mixin for your class so Jackson can marshall it.
+//      objectMapper.addMixIn(AppUserPrincipal.class, AppUserPrincipal.class);
+//      rowMapper.setObjectMapper(objectMapper);
+//      service.setAuthorizationRowMapper(rowMapper);
+//      return service;
 
-      ObjectMapper objectMapper = new ObjectMapper();
-      ClassLoader classLoader = CustomJdbcOAuth2AuthorizationService.class.getClassLoader();
-
-      List<Module> securityModules = SecurityJackson2Modules.getModules(classLoader);
-      objectMapper.registerModules(securityModules);
-      objectMapper.registerModule(new OAuth2AuthorizationServerJackson2Module());
-      // You will need to write the Mixin for your class so Jackson can marshall it.
-      objectMapper.addMixIn(AppUserPrincipal.class, AppUserPrincipal.class);
-      rowMapper.setObjectMapper(objectMapper);
-      service.setAuthorizationRowMapper(rowMapper);
-
-
-      //return new CustomJdbcOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository);
-      return service;
+      return new CustomJdbcOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository);
    }
 
    @Bean

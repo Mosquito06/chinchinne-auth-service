@@ -32,15 +32,12 @@ public class AuthorizationServerConfig
 
    ClientSecretAuthenticationProvider oauthClientAuthProvider;
 
-   CustomAuthenticationProvider customAuthenticationProvider;
-
    @Autowired
    @SuppressWarnings("unused")
-   public AuthorizationServerConfig(PasswordGrantFilter passwordGrantFilter, ClientSecretAuthenticationProvider oauthClientAuthProvider, CustomAuthenticationProvider customAuthenticationProvider)
+   public AuthorizationServerConfig(PasswordGrantFilter passwordGrantFilter, ClientSecretAuthenticationProvider oauthClientAuthProvider)
    {
       this.passwordGrantFilter = passwordGrantFilter;
       this.oauthClientAuthProvider = oauthClientAuthProvider;
-      this.customAuthenticationProvider = customAuthenticationProvider;
    }
 
    @Bean
@@ -60,9 +57,6 @@ public class AuthorizationServerConfig
          JwtAuthenticationToken principal = (JwtAuthenticationToken) authentication.getPrincipal();
          return new OidcUserInfo(principal.getToken().getClaims());
       };
-
-      authorizationServerConfigurer.authorizationEndpoint( authorizationEndpoint->
-              authorizationEndpoint.authenticationProvider(customAuthenticationProvider));
 
       http  .requestMatchers().requestMatchers(endpointsMatcher, passwordGrantEndPointMatcher).and()
             .authorizeRequests()
@@ -89,7 +83,6 @@ public class AuthorizationServerConfig
    @SuppressWarnings("unused")
    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration, AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception
    {
-     // return authenticationManagerBuilder.authenticationProvider(customAuthenticationProvider).build();
       return authenticationConfiguration.getAuthenticationManager();
    }
 }

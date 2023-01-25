@@ -1,8 +1,11 @@
 package com.chinchinne.authservice.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonRootName;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Type;
+import org.springframework.boot.jackson.JsonMixin;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -15,6 +18,8 @@ import java.util.UUID;
 @Entity
 @Table(name = "app_users")
 @NoArgsConstructor
+@JsonRootName("user")
+@JsonIgnoreProperties( ignoreUnknown = true )
 public class AppUser implements Serializable {
    private static final long serialVersionUID = -1L;
    @Id
