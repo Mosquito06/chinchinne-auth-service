@@ -2,6 +2,7 @@ package com.chinchinne.authservice.config;
 
 import java.util.function.Function;
 
+import com.chinchinne.authservice.filter.ExceptionHandlerFilter;
 import com.chinchinne.authservice.filter.PasswordGrantFilter;
 import com.chinchinne.authservice.provider.CustomAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import org.springframework.security.oauth2.server.authorization.oidc.authenticat
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
@@ -32,12 +34,15 @@ public class AuthorizationServerConfig
 
    ClientSecretAuthenticationProvider oauthClientAuthProvider;
 
+   private ExceptionHandlerFilter exceptionHandlerFilter;
+
    @Autowired
    @SuppressWarnings("unused")
-   public AuthorizationServerConfig(PasswordGrantFilter passwordGrantFilter, ClientSecretAuthenticationProvider oauthClientAuthProvider)
+   public AuthorizationServerConfig(PasswordGrantFilter passwordGrantFilter, ClientSecretAuthenticationProvider oauthClientAuthProvider, ExceptionHandlerFilter exceptionHandlerFilter)
    {
       this.passwordGrantFilter = passwordGrantFilter;
       this.oauthClientAuthProvider = oauthClientAuthProvider;
+      this.exceptionHandlerFilter = exceptionHandlerFilter;
    }
 
    @Bean
@@ -72,6 +77,7 @@ public class AuthorizationServerConfig
             )
             .and()
             .addFilterBefore(passwordGrantFilter, AbstractPreAuthenticatedProcessingFilter.class)
+             .addFilterBefore(exceptionHandlerFilter, PasswordGrantFilter.class)
             .exceptionHandling(exceptions ->
                   exceptions.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
             );
