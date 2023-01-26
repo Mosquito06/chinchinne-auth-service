@@ -174,9 +174,7 @@ public class AuthService
       }
       catch ( BadCredentialsException e )
       {
-         log.error( "여기 에러 : " + e.getMessage() );
          throw new CustomException(ErrorCode.UNAUTHORIZED_MEMBER);
-
       }
       catch (Exception ex)
       {
