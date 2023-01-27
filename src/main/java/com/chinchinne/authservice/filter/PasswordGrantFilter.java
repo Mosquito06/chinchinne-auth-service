@@ -1,5 +1,6 @@
 package com.chinchinne.authservice.filter;
 import com.chinchinne.authservice.model.CustomException;
+import com.chinchinne.authservice.model.GrantType;
 import com.chinchinne.authservice.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -42,7 +43,18 @@ public class PasswordGrantFilter extends OncePerRequestFilter
          return;
       }
 
-      byte[] entity = authService.getAccessTokenForRequest(request).getBytes(StandardCharsets.UTF_8);
+      String GRANT_TYPE = request.getParameter("grant_type").toUpperCase();
+      byte[] entity = null;
+
+      if( GRANT_TYPE.equals(GrantType.REFRESH_TOKEN.name()) )
+      {
+         entity = authService.getRefreshTokenForRequest(request).getBytes(StandardCharsets.UTF_8);
+      }
+      else
+      {
+         entity = authService.getAccessTokenForRequest(request).getBytes(StandardCharsets.UTF_8);
+      }
+
       response.getOutputStream().write(entity);
       response.setContentType("application/json");
    }

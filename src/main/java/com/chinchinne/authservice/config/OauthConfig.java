@@ -80,7 +80,7 @@ public class OauthConfig
                                                          .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
                                                          .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                                                          .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-                                                         .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                                                         //.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
                                                          .redirectUri(authProperties.getRedirectUri())
                                                          .scope(OidcScopes.OPENID)
                                                          .scope("read")

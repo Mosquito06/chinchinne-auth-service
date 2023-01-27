@@ -43,6 +43,8 @@ public class AuthService
    private final AuthenticationManager authenticationManager;
    private final OAuth2AuthorizationCodeRequestAuthenticationProvider oAuth2AuthorizationCodeRequestAuthenticationProvider;
    private final OAuth2AuthorizationCodeAuthenticationProvider oAuth2AuthorizationCodeAuthenticationProvider;
+
+   private final OAuth2RefreshTokenAuthenticationProvider oAuth2RefreshTokenAuthenticationProvider;
    private final ClientSecretAuthenticationProvider clientSecretAuthenticationProvider;
    private final AuthProperties authProperties;
    private final ObjectMapper objectMapper;
@@ -71,6 +73,7 @@ public class AuthService
       this.oAuth2AuthorizationCodeRequestAuthenticationProvider = new OAuth2AuthorizationCodeRequestAuthenticationProvider(registeredClientRepository, authorizationService, authorizationConsentService);
       this.clientSecretAuthenticationProvider = clientSecretAuthenticationProvider;
       this.oAuth2AuthorizationCodeAuthenticationProvider = new OAuth2AuthorizationCodeAuthenticationProvider(authorizationService, tokenGenerator);
+      this.oAuth2RefreshTokenAuthenticationProvider = new OAuth2RefreshTokenAuthenticationProvider(authorizationService, tokenGenerator);
       this.authProperties = authProperties;
       this.objectMapper = new ObjectMapper();
       this.passwordEncoder = passwordEncoder;
@@ -175,6 +178,89 @@ public class AuthService
       catch ( BadCredentialsException e )
       {
          throw new CustomException(ErrorCode.UNAUTHORIZED_MEMBER);
+      }
+      catch (Exception ex)
+      {
+         log.error("error in get token >>>", ex);
+         throw new RuntimeException(ex);
+      }
+   }
+
+   public String getRefreshTokenForRequest(HttpServletRequest request)
+   {
+      try
+      {
+         String REFRESH_TOKEN = request.getParameter("refresh_token").toString();
+         Assert.notNull(REFRESH_TOKEN, "REFRESH_TOKEN parameter must not be empty or null");
+
+         Map<String, Object> params = new HashMap<>();
+         //OAuth2AuthorizationCode authorizationCode = authorizationCodeRequestAuthenticationResult.getAuthorizationCode();
+         //params.put("code", authorizationCode == null ? "EMPTY" : authorizationCodeRequestAuthenticationResult.getAuthorizationCode().getTokenValue());
+         params.put("redirect_uri", authProperties.getRedirectUri());
+         params.put("grant_type", "authorization_code");
+         params.put("client_id", authProperties.getClientId());
+
+         OAuth2ClientAuthenticationToken clientAuthenticationToken = new OAuth2ClientAuthenticationToken
+         (
+              authProperties.getClientId()
+             ,ClientAuthenticationMethod.CLIENT_SECRET_BASIC
+             ,authProperties.getClientSecret()
+             ,params
+         );
+
+         Authentication clientAuthenticationResult = clientSecretAuthenticationProvider.authenticate(clientAuthenticationToken);
+
+         Set<String> scopes = new HashSet<String>();
+         scopes.add("read");
+         scopes.add("openid");
+         scopes.add("write");
+
+         OAuth2RefreshTokenAuthenticationToken refreshAuthToken = new OAuth2RefreshTokenAuthenticationToken
+         (
+              REFRESH_TOKEN
+             ,clientAuthenticationResult
+             ,scopes
+             ,params
+         );
+
+         ProviderSettings providerSettings = ProviderSettings.builder().issuer(authProperties.getIssuerUri()).build();
+         ProviderContextHolder.setProviderContext(new ProviderContext(providerSettings, null));
+
+         OAuth2AccessTokenAuthenticationToken accessTokenAuthentication =
+                 ( OAuth2AccessTokenAuthenticationToken ) oAuth2RefreshTokenAuthenticationProvider.authenticate(refreshAuthToken);
+
+         OAuth2AccessToken accessToken = accessTokenAuthentication.getAccessToken();
+         OAuth2RefreshToken refreshToken = accessTokenAuthentication.getRefreshToken();
+         Map<String, Object> additionalParameters = accessTokenAuthentication.getAdditionalParameters();
+         additionalParameters.remove("id_token");
+
+         OAuth2AccessTokenResponse.Builder builder = OAuth2AccessTokenResponse.withToken(accessToken.getTokenValue())
+                                                                              .tokenType(accessToken.getTokenType());
+
+         if (accessToken.getIssuedAt() != null && accessToken.getExpiresAt() != null)
+         {
+            builder.expiresIn(ChronoUnit.SECONDS.between(accessToken.getIssuedAt(), accessToken.getExpiresAt()));
+         }
+
+         if (refreshToken != null)
+         {
+            builder.refreshToken(refreshToken.getTokenValue());
+         }
+
+         if (refreshToken.getIssuedAt() != null && refreshToken.getExpiresAt() != null)
+         {
+            additionalParameters.put("refresh_expires_in", ChronoUnit.SECONDS.between(refreshToken.getIssuedAt(), refreshToken.getExpiresAt()));
+         }
+
+         if (!CollectionUtils.isEmpty(additionalParameters))
+         {
+            builder.additionalParameters(additionalParameters);
+         }
+
+         OAuth2AccessTokenResponse accessTokenResponse = builder.build();
+         Map<String, Object> accessTokenResponseMap = convert(accessTokenResponse);
+
+         return objectMapper.writeValueAsString(accessTokenResponseMap);
       }
       catch (Exception ex)
       {
