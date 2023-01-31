@@ -10,12 +10,13 @@
     </parent>
     <groupId>com.chinchinne</groupId>
     <artifactId>auth-service</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
     <name>auth-service</name>
     <description>auth-service</description>
     <properties>
-        <version.commons.compress>1.21</version.commons.compress>
         <java.version>11</java.version>
+        <version.commons.compress>1.21</version.commons.compress>
+        <spring-cloud.version>2021.0.5</spring-cloud.version>
     </properties>
     <dependencies>
         <!-- about spring security oauth2 -->
@@ -53,6 +54,20 @@
             <artifactId>spring-boot-starter-jdbc</artifactId>
         </dependency>
         <!-- about dbms -->
+
+        <!-- about cloud -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
+        <!-- about cloud -->
+
+        <!--about config -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <!--about config -->
 
         <!-- about test -->
         <dependency>
@@ -93,6 +108,17 @@
         </dependency>
         <!-- about etc -->
     </dependencies>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <plugins>

@@ -1,6 +1,13 @@
 server:
   port: 30020
 
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://127.0.0.1:30000/eureka
+
 auth:
   local-server: true
   issuer-uri: http://127.0.0.1:${server.port}
@@ -12,6 +19,8 @@ auth:
   redirect-uri: https://127.0.0.1:8086/login/oauth2/code/custom
 
 spring:
+  application:
+    name: auth-service
   datasource:
     url: jdbc:mariadb://127.0.0.1:3306/chinchinne
     driver-class-name: org.mariadb.jdbc.Driver
