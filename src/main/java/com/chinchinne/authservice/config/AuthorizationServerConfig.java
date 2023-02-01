@@ -84,11 +84,4 @@ public class AuthorizationServerConfig
 
       return http.build();
    }
-
-   @Bean
-   @SuppressWarnings("unused")
-   public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration, AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception
-   {
-      return authenticationConfiguration.getAuthenticationManager();
-   }
 }

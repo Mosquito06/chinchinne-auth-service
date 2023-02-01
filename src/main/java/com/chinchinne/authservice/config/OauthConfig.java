@@ -18,8 +18,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -140,33 +143,42 @@ public class OauthConfig
       return clientAuthenticationProvider;
    }
 
-   @Bean
-   @SuppressWarnings("unused")
-   public DaoAuthenticationProvider authenticationProvider(UserDetailsService userDetailsService)
-   {
-      DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-      authProvider.setUserDetailsService(userDetailsService);
-      authProvider.setPasswordEncoder(passwordEncoder());
-
-      return authProvider;
-   }
-
 //   @Bean
 //   @SuppressWarnings("unused")
-//   public CustomAuthenticationProvider authenticationProvider(UserDetailsService userDetailsService)
+//   public DaoAuthenticationProvider authenticationProvider(UserDetailsService userDetailsService)
 //   {
-//      return new CustomAuthenticationProvider(userDetailsService);
+//      DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+//      authProvider.setUserDetailsService(userDetailsService);
+//      authProvider.setPasswordEncoder(passwordEncoder());
+//
+//      return authProvider;
 //   }
 
    @Bean
    @SuppressWarnings("unused")
-   OAuth2TokenCustomizer<JwtEncodingContext> jwtCustomizer()
+   public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration, AuthenticationManagerBuilder authenticationManagerBuilder, UserDetailsService userDetailsService) throws Exception
    {
-      return context ->
-      {
-         JwsHeader.Builder headers = context.getHeaders();
-         JwtClaimsSet.Builder claims = context.getClaims();
-         OAuth2Authorization authorization = context.get(OAuth2Authorization.class);
+      authenticationManagerBuilder.authenticationProvider(authenticationProvider(userDetailsService));
+
+      return authenticationConfiguration.getAuthenticationManager();
+   }
+
+   @Bean
+   @SuppressWarnings("unused")
+   public CustomAuthenticationProvider authenticationProvider(UserDetailsService userDetailsService)
+   {
+      return new CustomAuthenticationProvider(userDetailsService);
+   }
+
+   @Bean
+   @SuppressWarnings("unused")
+   OAuth2TokenCustomizer<JwtEncodingContext> jwtCustomizer()
+         {
+            return context ->
+            {
+               JwsHeader.Builder headers = context.getHeaders();
+               JwtClaimsSet.Builder claims = context.getClaims();
+               OAuth2Authorization authorization = context.get(OAuth2Authorization.class);
          RegisteredClient registeredClient = context.get(RegisteredClient.class);
          OAuth2AuthorizationCodeAuthenticationToken authorizationCodeAuthentication = context.get(OAuth2AuthorizationCodeAuthenticationToken.class);
 

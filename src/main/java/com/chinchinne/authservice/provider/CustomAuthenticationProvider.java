@@ -1,6 +1,9 @@
 package com.chinchinne.authservice.provider;
 
 import com.chinchinne.authservice.model.AppUser;
+import com.chinchinne.authservice.model.CustomException;
+import com.chinchinne.authservice.model.ErrorCode;
+import com.chinchinne.authservice.model.GrantType;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -25,6 +28,11 @@ public class CustomAuthenticationProvider implements AuthenticationProvider
         String loginPass = (String) authentication.getCredentials();
 
         UserDetails user = userDetailsService.loadUserByUsername(loginId);
+
+        if( !user.getPassword().equals(loginPass) )
+        {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_MEMBER);
+        }
 
         return new UsernamePasswordAuthenticationToken(loginId, loginPass, user.getAuthorities());
     }
