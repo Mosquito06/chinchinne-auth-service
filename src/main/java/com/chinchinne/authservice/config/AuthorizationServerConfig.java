@@ -24,6 +24,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
+import org.springframework.security.web.session.DisableEncodeUrlFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
@@ -77,7 +78,7 @@ public class AuthorizationServerConfig
             )
             .and()
             .addFilterBefore(passwordGrantFilter, AbstractPreAuthenticatedProcessingFilter.class)
-             .addFilterBefore(exceptionHandlerFilter, PasswordGrantFilter.class)
+            .addFilterBefore(exceptionHandlerFilter, DisableEncodeUrlFilter.class)
             .exceptionHandling(exceptions ->
                   exceptions.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
             );

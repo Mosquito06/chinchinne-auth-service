@@ -1,5 +1,6 @@
 package com.chinchinne.authservice.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
 public class ErrorResponse
 {
     @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonFormat( shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
     private final LocalDateTime timestamp = LocalDateTime.now();
     private final int status;
     private final String error;
@@ -55,7 +57,8 @@ public class ErrorResponse
                 .message(errorCode.getDetail())
                 .build()
             ));
-        }catch (IOException e)
+        }
+        catch (IOException e)
         {
             e.printStackTrace();
         }

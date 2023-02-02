@@ -6,6 +6,7 @@ import com.chinchinne.authservice.model.AppUser;
 import com.chinchinne.authservice.model.AppUserPrincipal;
 import com.chinchinne.authservice.model.CustomException;
 import com.chinchinne.authservice.model.ErrorCode;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Sets;
@@ -15,6 +16,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.core.*;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AccessTokenResponse;
@@ -175,13 +177,17 @@ public class AuthService
 
          return objectMapper.writeValueAsString(accessTokenResponseMap);
       }
+      catch ( UsernameNotFoundException e)
+      {
+         throw new CustomException( ErrorCode.UNKNOWN_MEMBER );
+      }
       catch ( BadCredentialsException e )
       {
-         throw new CustomException(ErrorCode.UNAUTHORIZED_MEMBER);
+         throw new CustomException(ErrorCode.INCORRECT_PASSWORD);
       }
       catch (Exception ex)
       {
-         log.error("error in get token >>>", ex);
+        //log.error("error in get token >>>", ex);
          throw new RuntimeException(ex);
       }
    }

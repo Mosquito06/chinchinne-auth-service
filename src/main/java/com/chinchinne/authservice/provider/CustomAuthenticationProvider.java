@@ -5,12 +5,14 @@ import com.chinchinne.authservice.model.CustomException;
 import com.chinchinne.authservice.model.ErrorCode;
 import com.chinchinne.authservice.model.GrantType;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.UserDetailsManager;
+import org.springframework.util.ObjectUtils;
 
 public class CustomAuthenticationProvider implements AuthenticationProvider
 {
@@ -31,7 +33,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider
 
         if( !user.getPassword().equals(loginPass) )
         {
-            throw new CustomException(ErrorCode.UNAUTHORIZED_MEMBER);
+            throw new BadCredentialsException("not match password");
         }
 
         return new UsernamePasswordAuthenticationToken(loginId, loginPass, user.getAuthorities());
