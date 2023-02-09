@@ -36,7 +36,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider
             throw new BadCredentialsException("not match password");
         }
 
-        return new UsernamePasswordAuthenticationToken(loginId, loginPass, user.getAuthorities());
+        return new UsernamePasswordAuthenticationToken(user, loginPass, user.getAuthorities());
     }
 
     @Override
