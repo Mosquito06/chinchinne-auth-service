@@ -55,6 +55,8 @@ public class AuthService
 
    private final static String FIRST_NAME = "firstName";
    private final static String LAST_NAME = "lastName";
+
+   private final static String UUID = "uuid";
    private static final String LOCAL_AUTHORIZATION_URI = "http://localhost:30020/oauth2/authorize";
 
    @Autowired
@@ -87,8 +89,6 @@ public class AuthService
       String passwordInBase64 = request.getParameter("password");
       Assert.notNull(userName, "Username parameter must not be empty or null");
       Assert.hasText(passwordInBase64, "Password parameter must not be empty or null");
-      //String password = new String(Base64.getUrlDecoder().decode(passwordInBase64));
-      //String password = passwordEncoder.encode(passwordInBase64);
       String password = passwordInBase64;
 
       UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(userName, password);
@@ -97,8 +97,6 @@ public class AuthService
       {
          Authentication principal = authenticationManager.authenticate(authRequest);
 
-         // from org.springframework.security.oauth2.server.authorization.web.OAuth2AuthorizationEndpointFilter.doFilterInternal
-         // from org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2AuthorizationCodeRequestAuthenticationConverter.convert
          OAuth2AuthorizationCodeRequestAuthenticationToken requestAuthenticationToken =
                OAuth2AuthorizationCodeRequestAuthenticationToken.with(authProperties.getClientId(), principal)
                      .authorizationUri(LOCAL_AUTHORIZATION_URI)
@@ -110,8 +108,6 @@ public class AuthService
          OAuth2AuthorizationCodeRequestAuthenticationToken authorizationCodeRequestAuthenticationResult =
                (OAuth2AuthorizationCodeRequestAuthenticationToken) oAuth2AuthorizationCodeRequestAuthenticationProvider.authenticate(requestAuthenticationToken);
 
-         // from org.springframework.security.oauth2.server.authorization.web.OAuth2TokenEndpointFilter.doFilterInternal
-         // from org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2AuthorizationCodeAuthenticationConverter.convert
          Map<String, Object> params = new HashMap<>();
          OAuth2AuthorizationCode authorizationCode = authorizationCodeRequestAuthenticationResult.getAuthorizationCode();
          params.put("code", authorizationCode == null ? "EMPTY" : authorizationCodeRequestAuthenticationResult.getAuthorizationCode().getTokenValue());
@@ -140,7 +136,6 @@ public class AuthService
          OAuth2AccessTokenAuthenticationToken accessTokenAuthentication =
                (OAuth2AccessTokenAuthenticationToken) oAuth2AuthorizationCodeAuthenticationProvider.authenticate(codeToken);
 
-         // from org.springframework.security.oauth2.server.authorization.web.OAuth2TokenEndpointFilter.sendAccessTokenResponse
          OAuth2AccessToken accessToken = accessTokenAuthentication.getAccessToken();
          OAuth2RefreshToken refreshToken = accessTokenAuthentication.getRefreshToken();
          Map<String, Object> additionalParameters = accessTokenAuthentication.getAdditionalParameters();
@@ -151,6 +146,7 @@ public class AuthService
             AppUser user = appUserPrincipal.getUser();
             additionalParameters.put(FIRST_NAME, user.getFirstName());
             additionalParameters.put(LAST_NAME, user.getLastName());
+            additionalParameters.put(UUID, user.getId());
          }
 
          OAuth2AccessTokenResponse.Builder builder = OAuth2AccessTokenResponse.withToken(accessToken.getTokenValue())
@@ -200,8 +196,6 @@ public class AuthService
          Assert.notNull(REFRESH_TOKEN, "REFRESH_TOKEN parameter must not be empty or null");
 
          Map<String, Object> params = new HashMap<>();
-         //OAuth2AuthorizationCode authorizationCode = authorizationCodeRequestAuthenticationResult.getAuthorizationCode();
-         //params.put("code", authorizationCode == null ? "EMPTY" : authorizationCodeRequestAuthenticationResult.getAuthorizationCode().getTokenValue());
          params.put("redirect_uri", authProperties.getRedirectUri());
          params.put("grant_type", "authorization_code");
          params.put("client_id", authProperties.getClientId());
