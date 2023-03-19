@@ -20,6 +20,7 @@
   <img src="https://img.shields.io/badge/Java-6DB33F?style=for-the-badge">
   <img src="https://img.shields.io/badge/Spring Boot-6DB33F?style=for-the-badge&logo=Spring Boot&logoColor=white">
   <img src="https://img.shields.io/badge/Spring Security OAuth2-6DB33F?style=for-the-badge&logo=Spring Security&logoColor=white">
+  <img src="https://img.shields.io/badge/Spring Data JPA-6DB33F?style=for-the-badge&logo=Spring&logoColor=white">
 </div>
 
   * 친친네에서 사용할 가계부 Auth 서비스
