@@ -8,6 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.Builder;
 import lombok.Getter;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
@@ -24,26 +25,27 @@ public class ErrorResponse
     private final LocalDateTime timestamp = LocalDateTime.now();
     private final int status;
     private final String error;
-    private final String code;
+    private final int code;
     private final String message;
 
     public static ResponseEntity<ErrorResponse> toResponseEntity(ErrorCode errorCode)
     {
-        return ResponseEntity
-                .status(errorCode.getHttpStatus())
-                .body(ErrorResponse.builder()
-                        .status(errorCode.getHttpStatus().value())
-                        .error(errorCode.getHttpStatus().name())
-                        .code(errorCode.name())
-                        .message(errorCode.getDetail())
-                        .build()
-                );
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                            .body
+                            (
+                                ErrorResponse.builder()
+                                            .status(errorCode.getCode())
+                                            .error(errorCode.name())
+                                            .code(errorCode.getCode())
+                                            .message(errorCode.getDetail())
+                                            .build()
+                            );
     }
 
     public static void toResponseEntity(HttpServletResponse response, ErrorCode errorCode)
         {
             ObjectMapper objectMapper = new ObjectMapper();
-            response.setStatus(errorCode.getHttpStatus().value());
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
             response.setContentType(MediaType.valueOf("application/json; charset=UTF-8").toString());
 
         try
@@ -51,11 +53,11 @@ public class ErrorResponse
             response.getWriter().write(objectMapper.writeValueAsString
             (
                  ErrorResponse.builder()
-                .status(errorCode.getHttpStatus().value())
-                .error(errorCode.getHttpStatus().name())
-                .code(errorCode.name())
-                .message(errorCode.getDetail())
-                .build()
+                             .status(errorCode.getCode())
+                             .error(errorCode.name())
+                             .code(errorCode.getCode())
+                             .message(errorCode.getDetail())
+                             .build()
             ));
         }
         catch (IOException e)
